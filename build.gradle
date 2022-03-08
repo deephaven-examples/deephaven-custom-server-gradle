@@ -1,0 +1,51 @@
+plugins {
+    id 'io.deephaven.java-repository-conventions'
+    id 'application'
+    id 'java'
+}
+
+group = 'io.deephaven.example'
+description = 'A Deephaven custom server built with Gradle'
+version = '0.1.0'
+
+application {
+    mainClass = 'io.deephaven.server.netty.NettyMain'
+}
+
+// Java 11+ required
+if (!JavaVersion.current().isJava11Compatible()) {
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(11)
+        }
+    }
+}
+
+dependencies {
+    // Example custom dependencies
+    implementation 'org.apache.commons:commons-math3:3.6.1'
+
+    // Deephaven dependencies
+    implementation platform('io.deephaven:deephaven-bom:0.10.0')
+    implementation 'io.deephaven:deephaven-server'
+    implementation 'io.deephaven:deephaven-engine-function'
+    runtimeOnly 'io.deephaven:deephaven-server-netty'
+
+    // Example testing dependencies
+    testImplementation platform('org.junit:junit-bom:5.8.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.assertj:assertj-core:3.22.0'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs '-Ddeephaven.console.type=groovy'
+}
+
+tasks.withType(CreateStartScripts) {
+    defaultJvmOpts += ['-Ddeephaven.console.type=groovy']
+}
